@@ -15,7 +15,7 @@
         <div id="edit">
         <!-- <img src="1.jpg" id="Img"> -->
         <textarea name="" id="txt" wrap="virtual"></textarea>
-        <input type="button" name="" value="发送" id="btn" @click="sendMessage()">
+        <input type="button" name="" value="send" id="btn" @click="sendMessage()">
         </div>
     </div>
 </template>
@@ -38,6 +38,7 @@ export default {
     },
     data(){
        return {
+           //实际为通过api接口获取数据
            data:{
                friend:"John",
                messages:[
@@ -46,8 +47,7 @@ export default {
                {userName:"me", text:"glad to see u"},
                {userName:"John", text:"How r u today?"},
                {userName:"me", text:"I'm doing well"}]
-           }
-           
+           }         
        }
     },
     methods:{
@@ -57,14 +57,14 @@ export default {
             var my_message = {};
             my_message.userName = "me";
             my_message.text = text;
-            messages.push(my_message);
+            messages.push(my_message);//实际为发送到api接口
+            //以下代码只是为了观测效果
             setTimeout(function(){
                var others_message = {};
                others_message.userName = "John";
                others_message.text = "test";
                messages.push(others_message);
-            },"1000");
-            
+            },"1000");          
         }
     }
 }
