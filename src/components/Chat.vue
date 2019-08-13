@@ -5,14 +5,16 @@
             <span id="friend_name">{{data.friend}}</span>
         </div>    
         <div id="content">
-           <div class="atalk" v-for="row in data.messages">
-               <label>{{row.userName}}:</label>
+           <div v-for="row in message_data">
+               <div :class="row.style">
+               <label>{{row.userName}}</label>
                <span>{{row.text}}</span>
+               </div>
            </div>
         </div>
         <div id="edit">
         <!-- <img src="1.jpg" id="Img"> -->
-        <input type="text" name="" id="txt">
+        <textarea name="" id="txt" wrap="virtual"></textarea>
         <input type="button" name="" value="发送" id="btn" @click="sendMessage()">
         </div>
     </div>
@@ -22,12 +24,16 @@ export default {
     name:"Chat",
     props:{},
     computed:{
-        isMe(name){
-          if(name == "me"){
-              return true;
-          } else {
-              return false;
-          }
+        message_data(){
+          var messages = this.data.messages;
+          messages.map(function(i){
+            if(i.userName == "me"){
+              i.style = "btalk"
+            } else {
+              i.style = "atalk"
+            }
+          });
+          return messages;
         }
     },
     data(){
@@ -39,17 +45,26 @@ export default {
                {userName:"John", text:"hi"},
                {userName:"me", text:"glad to see u"},
                {userName:"John", text:"How r u today?"},
-               {userName:"me", text:"I'm doing well"}
-           ]}
+               {userName:"me", text:"I'm doing well"}]
+           }
+           
        }
     },
     methods:{
         sendMessage(){
+            var messages = this.data.messages;
             var text = $("#txt").val();
-            var message = {};
-            message.userName = "me";
-            message.text = text;
-            this.data.messages.push(message);
+            var my_message = {};
+            my_message.userName = "me";
+            my_message.text = text;
+            messages.push(my_message);
+            setTimeout(function(){
+               var others_message = {};
+               others_message.userName = "John";
+               others_message.text = "test";
+               messages.push(others_message);
+            },"1000");
+            
         }
     }
 }
@@ -93,6 +108,12 @@ export default {
             margin:0;
             overflow:auto;
         }
+        #edit{
+            background: #ece7e766;
+            height: 10%;
+            width:100%;
+            display:inline-block
+        }
         #txt{
             /* margin: 2.5% 0 0 5%; */
             margin: 0 auto;
@@ -101,6 +122,8 @@ export default {
             /* float: left; */
             width: 70%;
             height: 50%;
+            overflow: hidden;
+            resize:none;
             position: relative;
             top: 50%; 
             transform: translateY(-50%);
@@ -114,11 +137,6 @@ export default {
             position: relative;
             top: 50%; /*偏移*/
             transform: translateY(-50%);
-        }
-        #edit{
-            background: #ece7e766;
-            height: 10%;
-            width:100%;
         }
         #Img{
             width: 10%;
@@ -134,9 +152,31 @@ export default {
         .atalk{
            margin:10px;
         }
+        .atalk label{
+            float: left;
+        }
         .atalk span{
+            margin-left: 10px;
             display:inline-block;
             background:#0181cc;
+            border-radius:10px;
+            color:#fff;
+            padding:5px 10px;
+            max-width:70%;
+            word-wrap: break-word;
+            word-break: normal;
+        }
+        .btalk{
+            margin:10px;
+            text-align:right;
+        }
+        .btalk label{
+            float: right;
+        }
+        .btalk span{
+            margin-right: 10px;
+            display:inline-block;
+            background:#ef8201;
             border-radius:10px;
             color:#fff;
             padding:5px 10px;
