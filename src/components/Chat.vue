@@ -2,13 +2,14 @@
     <div id="chat">  
         <div id="title">
             <span class="glyphicon glyphicon-chevron-left"></span>
-            <span id="friend_name">{{data.friend}}</span>
+            <span id="friend_name">{{data.friend_name}}</span>
+            <router-link v-bind:to="'/'" style="float:right">History</router-link>
         </div>    
         <div id="content">
-           <div v-for="row in message_data">
-               <div :class="row.style">
-               <label>{{row.userName}}</label>
-               <span>{{row.text}}</span>
+           <div v-for="row in data.messages">
+               <div :class="row.from == data.user_id ? 'btalk':'atalk'">
+               <label>{{row.from == data.user_id ? data.user_name : data.friend_name}}</label>
+               <span>{{row.msg}}</span>
                </div>
            </div>
         </div>
@@ -16,6 +17,7 @@
         <!-- <img src="1.jpg" id="Img"> -->
         <textarea name="" id="txt" wrap="virtual"></textarea>
         <input type="button" name="" value="send" id="btn" @click="sendMessage()">
+        <input type="button" name="" value="connect" id="conn" @click="connect()">
         </div>
     </div>
 </template>
@@ -24,47 +26,58 @@ export default {
     name:"Chat",
     props:{},
     computed:{
-        message_data(){
-          var messages = this.data.messages;
-          messages.map(function(i){
-            if(i.userName == "me"){
-              i.style = "btalk"
-            } else {
-              i.style = "atalk"
-            }
-          });
-          return messages;
-        }
+        // message_data(){
+        //   var messages = this.data.messages;
+        //   messages.map(function(i){
+        //     if(i.userName == "me"){
+        //       i.style = "btalk"
+        //     } else {
+        //       i.style = "atalk"
+        //     }
+        //   });
+        //   return messages;
+        // }
     },
     data(){
        return {
            //实际为通过api接口获取数据
            data:{
-               friend:"John",
-               messages:[
-               {userName:"me", text:"hello"},
-               {userName:"John", text:"hi"},
-               {userName:"me", text:"glad to see u"},
-               {userName:"John", text:"How r u today?"},
-               {userName:"me", text:"I'm doing well"}]
+               user_id:"001",
+               user_name:"mark",
+               friend_id:"002",
+               friend_name:"TEST",
+               messages:[]
            }         
        }
     },
     methods:{
         sendMessage(){
-            var messages = this.data.messages;
             var text = $("#txt").val();
-            var my_message = {};
-            my_message.userName = "me";
-            my_message.text = text;
-            messages.push(my_message);//实际为发送到api接口
-            //以下代码只是为了观测效果
-            setTimeout(function(){
-               var others_message = {};
-               others_message.userName = "John";
-               others_message.text = "test";
-               messages.push(others_message);
-            },"1000");          
+            var msg_obj = {};
+            msg_obj.from = this.data.user_id;            
+            msg_obj.to = this.data.friend_id;
+            msg_obj.msg = text;
+            console.log(msg_obj);
+            if( window.s !== null){
+               window.s.send(JSON.stringify(msg_obj)) 
+            }
+            this.data.messages.push(msg_obj);                 
+        },
+        connect(){
+            var user_id = this.data.user_id;
+            var data = this.data;
+            var socket = new WebSocket("ws://127.0.0.1:8023");
+                socket.onopen = function (e) {
+                    console.log('WebSocket open!');//成功连接上Websocket
+                    var msg_obj = [user_id,user_id]
+                    socket.send(JSON.stringify(msg_obj))
+                };
+                socket.onmessage = function (e) {
+                    console.log('message: ' + e.data);
+                    var msg_obj = JSON.parse(e.data);
+                    data.messages.push(msg_obj);                    
+                };
+            window.s = socket;
         }
     }
 }
