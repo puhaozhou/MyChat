@@ -42,26 +42,26 @@ export default {
        return {
            //实际为通过api接口获取数据
            data:{
-               user_id:"001",
-               user_name:"mark",
-               friend_id:"002",
-               friend_name:"TEST",
+               user_id:"002",
+               user_name:"TEST2",
+               friend_id:"001",
+               friend_name:"TEST1",
                messages:[]
            }         
        }
     },
-    methods:{
+    methods:{ 
         sendMessage(){
             var text = $("#txt").val();
             var msg_obj = {};
             msg_obj.from = this.data.user_id;            
             msg_obj.to = this.data.friend_id;
             msg_obj.msg = text;
-            console.log(msg_obj);
-            if( window.s !== null){
+            console.log('send' + msg_obj);
+            if(window.s !== null){
                window.s.send(JSON.stringify(msg_obj)) 
             }
-            this.data.messages.push(msg_obj);                 
+            this.data.messages.push(msg_obj);              
         },
         connect(){
             var user_id = this.data.user_id;
@@ -73,9 +73,12 @@ export default {
                     socket.send(JSON.stringify(msg_obj))
                 };
                 socket.onmessage = function (e) {
-                    console.log('message: ' + e.data);
+                    // console.log('message: ' + e.data);
                     var msg_obj = JSON.parse(e.data);
-                    data.messages.push(msg_obj);                    
+                    if(msg_obj.from == data.friend_id) 
+                       data.messages.push(msg_obj);    
+                    else
+                       console.log(msg_obj);        
                 };
             window.s = socket;
         }
